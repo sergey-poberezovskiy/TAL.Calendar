@@ -2,6 +2,9 @@
 
 namespace Calendar.Business.Model;
 
+/// <summary>
+/// Slot to always keep free from appointments
+/// </summary>
 public class KeptSlot
 {
 	[Key]

@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Calendar.Business.Model;
 
+/// <summary>
+/// Appointment instance with determined <see cref="Start"/> and <see cref="Duration"/>.
+/// </summary>
 [Index(nameof(Date), nameof(Start), IsUnique = true)]
 public class Appointment
 {
