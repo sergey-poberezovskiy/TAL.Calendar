@@ -28,8 +28,8 @@ public class AppointmentManager(
 
 		var (date, start) = SplitDateTime(startTime);
 
-		Appointment? existing = await context.Appointments.FirstOrDefaultAsync(app => app.Date == date && app.Start == start && app.Duration == duration);
 		List<Appointment> dateAppointments = await context.Appointments.Where(app => app.Date == date).ToListAsync();
+		Appointment? existing = dateAppointments.FirstOrDefault(app => app.Start == start && app.Duration == duration);
 		List <KeptSlot> slots = await context.KeptSlots.ToListAsync();
 		if (existing != null)
 		{
