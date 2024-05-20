@@ -30,7 +30,7 @@ public class AppointmentManager(
 
 		List<Appointment> dateAppointments = await context.Appointments.Where(app => app.Date == date).ToListAsync();
 		Appointment? existing = dateAppointments.FirstOrDefault(app => app.Start == start && app.Duration == duration);
-		List <KeptSlot> slots = await context.KeptSlots.ToListAsync();
+		List<KeptSlot> slots = await context.KeptSlots.ToListAsync();
 		if (existing != null)
 		{
 			logger.LogWarning($"{nameof(Appointment)} with the same start time: {{startTime}} and {{duration}} already exists.", startTime, duration);
@@ -87,14 +87,14 @@ public class AppointmentManager(
 
 	public async Task<List<Appointment>> GetAvailableAsync(DateOnly date, int maxSlots = -1)
 	{
-		List<Appointment> existing = await context.Appointments.Where(app => app.Date == date).ToListAsync();
+		List<Appointment> dateAppointments = await context.Appointments.Where(app => app.Date == date).ToListAsync();
 		List<KeptSlot> slots = await context.KeptSlots.ToListAsync();
 
 		IEnumerable<Appointment> available = GenerateNineToFive(date)
 			.Where(app =>
 				IsValid(app.Date.ToDateTime(app.Start), app.Duration) &&
 				!slots.Any(slot => HasOverlap(app.Start, app.Duration, slot.Start, slot.Duration)) &&
-				!existing.Any(exist => HasOverlap(app.Start, app.Duration, exist.Start, exist.Duration))
+				!dateAppointments.Any(exist => HasOverlap(app.Start, app.Duration, exist.Start, exist.Duration))
 			)
 		;
 
@@ -116,7 +116,8 @@ public class AppointmentManager(
 		}
 		TimeSpan duration = TimeSpan.FromMinutes(durationMinutes);
 		TimeOnly finishTime = start.Add(duration);
-		if (start.Hour < 9 || finishTime.Hour > 17)
+		//	The acceptable time is between 9AM and 5PM
+		if (start.Hour < 9 || finishTime > new TimeOnly(17, 0))
 		{
 			logger.LogError($"Invalid {nameof(KeptSlot)}'s start time: {{start}} and/or duration: {{duration}}.", start, duration);
 
@@ -155,6 +156,7 @@ public class AppointmentManager(
 			};
 			await context.AddAsync(newKeptSlot);
 			await context.SaveChangesAsync();
+
 			return true;
 		}
 	}
@@ -184,6 +186,7 @@ public class AppointmentManager(
 				Duration = duration,
 			});
 		}
+
 		return result;
 	}
 
@@ -202,7 +205,7 @@ public class AppointmentManager(
 		DateTime finishTime = startTime.Add(duration);
 
 		//	The acceptable time is between 9AM and 5PM
-		if (startTime.Hour < 9 || finishTime.Hour > 17)
+		if (startTime.Hour < 9 || finishTime > startTime.Date.AddHours(17))
 		{
 			return false;
 		}
