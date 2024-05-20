@@ -140,7 +140,7 @@ internal partial class App(
 
 partial class App
 {
-	[GeneratedRegex("quit", RegexOptions.IgnoreCase, "en-AU")]
+	[GeneratedRegex("(quit|exit)", RegexOptions.IgnoreCase, "en-AU")]
 	private static partial Regex QuitRegex();
 
 	[GeneratedRegex(@"(add|delete) (?<day>\d{2})/(?<month>\d{2}) (?<hours>\d{2}):(?<minutes>\d{2})", RegexOptions.IgnoreCase)]
